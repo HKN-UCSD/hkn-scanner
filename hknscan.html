@@ -17,35 +17,96 @@
 
     <!-- Custom styles for this template -->
     <link href="css/signin.css" rel="stylesheet">
+
+    <link href="css/main.css" rel="stylesheet">
   </head>
 
   <body>
-
+    <div id="wrapperHeader">
+      <div id="header">
+        <img src="hknLogo.png" width="400" height="91" alt="logo" />
+      </div>
+    </div>
     <div class="container">
 
-      <form class="form-signin">
+      <form class="form-signin" id="signInForm" action="http://159.203.253.157:1234/process_signin" method="POST">
         <h2 class="form-signin-heading">Please sign in</h2>
         <!--
         <label for="inputEmail" class="sr-only">Email address</label>
         <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
         -->
         <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-        <div class="checkbox">
-          <label>
-            <input type="checkbox" value="remember-me"> Remember me
-          </label>
-        </div>
+        <input type="password" id="inputPassword" name="inputPassword" class="form-control" placeholder="Scan your id" required autofocus>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
       </form>
 
+      <div class="row form-signin">
+        <div id="loginMessage">
+        </div>
+      </div>
     </div> <!-- /container -->
+      <div class="row specialRow">
+        <div class="col-sm-3 offset-sm-2" id="leaderCredit">
+          <h4 class="centerText">Credit Leader Board</h4>
+        </div>
 
+        <div class="col-sm-3 offset-sm-2" id="leaderDebt">
+          <h4 class="centerText">Debt Leader Board</h4>
+        </div>
+      </div>
+    <footer class="footer">
+      <div class="centerText">
+        &copy Lucas Tindall 2016
+      </div>
+    </footer>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $("#inputPassword").on('input', function(){
+            console.log("keypress"); 
+            console.log($("#inputPassword").val().length); 
+            console.log($("#inputPassword").val()); 
+            if($("#inputPassword").val().length ==14){
+              $("#signInForm").submit(); 
+            }
+          });
+
+          $.get("/login_status", function(loginObject) {
+            if(loginObject != null && loginObject.loginStatus != null){
+              if(loginObject.loginStatus == false){ 
+                //document.getElementById("loginMessage").innerHTML=loginObject.loginStatus;
+                console.log("appending message"); 
+                $("#loginMessage").append(loginObject.loginMessage); 
+              } 
+              else{
+                console.log("rerouting to buy"); 
+                window.location.replace(location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')+"/buy.html"); 
+              } 
+            } 
+            console.log(loginObject); 
+          }); 
+
+          $.get("/leaderDebt", function(leaderDebtMessage) { 
+            $("#leaderDebt").append(leaderDebtMessage); 
+            
+          }); 
+          $.get("/leaderCredit", function(leaderCreditMessage) { 
+            $("#leaderCredit").append(leaderCreditMessage); 
+            
+          }); 
+
+          $(document).on("click", "#createUser", function(){
+              window.location.replace(location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')+"/register");
+          }); 
+        });
+    </script> 
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!--
     <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    -->
   </body>
 </html>

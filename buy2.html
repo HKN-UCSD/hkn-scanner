@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="Lucas Tindall">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>HKN Scanner</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/signin.css" rel="stylesheet">
+
+    <link href="css/main.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div id="wrapperHeader">
+      <div id="header">
+        <img src="hknLogo.png" width="400" height="91" alt="logo" />
+      </div> 
+    </div>
+    <div class="row container main-container">
+      <div class="col-sm-2 offset-sm-1 sidebar">
+      <ul class="sidebar-info">
+        <li>
+          <div id="username"></div>
+        </li>
+        <li>
+          <div id="balance"></div>
+        </li>
+        <li>
+          <a href="/buy.html">Make a purchase</a>
+        </li>
+        <li>
+          <a href="/credit.html">Add credit</a> 
+        </li>
+        <li>
+          <a href="#" id="logoutButton">logout</a>
+        </li>
+      </ul>
+      </div>
+      <div class="col-sm-6">
+    <div class="container">
+
+      <form class="form-signin" action="http://159.203.253.157:1234/process_buy" method="POST">
+        <h2 class="form-signin-heading">Scan items</h2>
+        <div class="form-group">
+          <div class="input-group">
+            <input type="text" class="form-control" id="barcode" name="barcode" placeholder="scan barcode" autofocus>
+          </div>
+        </div>
+        <!--
+        <div class="form-group">
+          <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+          <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input type="number" step="any" class="form-control" id="amount" name="amount" placeholder="Amount" required autofocus>
+          </div>
+        </div>
+        -->
+        <h4 class="form-signin-heading">Items</h4>
+        <div id="itemsList" class="row">
+
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-sm-10"><h4 class="form-signin-heading">Total</h4></div>
+          <input type="hidden" value="0" id="total" name="total">
+          <input type="hidden" value="" id="itemsString" name="itemsString">
+          <div class="col-sm-2">$<span id="totalSpan">0</span></div>
+        </div>
+        <br>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Buy</button>
+      </form>
+
+      <div class="row form-signin"> 
+        <div id="buyMessage"> 
+        </div>
+      </div>
+
+    </div> <!-- /container -->
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="centerText">
+        &copy Lucas Tindall 2016
+      </div>
+    </footer>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            console.log($("#barcode").val().length); 
+          $( "#barcode" ).on('input', function() { 
+            console.log($("#barcode").val()); 
+            if( $("#barcode").val().length >= 6 ){
+              $.post("/check_item", {item: $("#barcode").val()},function(item) { 
+                //found matching item
+                if(Object.keys(item).length !== 0 || item.constructor !== Object){
+                  //add item to list 
+                  //$("#itemsList").append("<li>"+item.name+"&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp$"+item.price+"</li>"); 
+                  $("#itemsList").append('<div class="col-sm-10">'+item.name+'</div><div class="col-sm-2">$'+item.price+'</div>'); 
+                  //increase total 
+                  var oldTotal = parseFloat($("#totalSpan").text()); 
+                  var newTotal = oldTotal + parseFloat(item.price); 
+                  $("#totalSpan").html(newTotal); 
+                  $("#total").val(newTotal); 
+                  $("#itemsString").val($("#itemsString").val()+item.name+", "); 
+                  
+                  $("#barcode").val(''); 
+                  console.log(item); 
+                  console.log(item.name);  
+                  console.log(item.price); 
+                }
+              }); 
+            }
+          }); 
+          $.get("/current_user", function(string) { 
+            document.getElementById("username").innerHTML=string; 
+            console.log(string); 
+          }); 
+          $.get("/current_balance", function(string) { 
+            console.log("got current balance"); 
+            document.getElementById("balance").innerHTML='Balance: $'+string; 
+            //document.getElementById("balance").innerHTML='<a href="/credit.html">Balance: $'+string+'</a>'; 
+          }); 
+
+          $.get("/buy_status", function(buyObject) { 
+
+              if(buyObject != null && buyObject.buyMessage != null){ 
+                  $("#buyMessage").append(buyObject.buyMessage); 
+              }
+
+          }); 
+
+          $(document).on("click","#logoutButton", function(){
+            
+            /*
+            $.get("/logout", function(ret){
+               window.location.replace(location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')+"/");  
+            }); 
+
+            console.log("button pressed"); 
+            */
+            
+            window.location.href = "/logout"; 
+            
+          }); 
+        }); 
+    </script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!--
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    -->
+  </body>
+</html>
