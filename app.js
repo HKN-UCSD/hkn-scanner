@@ -7,7 +7,7 @@ var GoogleSpreadsheet = require('google-spreadsheet');
 var async = require('async');
 
 
-// Get spreadsheet
+// Get spreadsheet  
 // spreadsheet key is the long id in the sheets URL
 var doc = new GoogleSpreadsheet('1NZJc2oPN9o_qWQq6CV7yCYGrmGwujlqfhEnhTBHTNKo');
 var sheet;
@@ -186,14 +186,18 @@ app.get('/register', function (req, res) {
 
 app.get('/leaderDebt', function (req, res) { 
 
+ 
+  //console.log('sheet 1: '+sheet.title+' '+sheet.rowCount+'x'+sheet.colCount);
   async.series([
-
+    
     function checkUser(callback) { 
       sheet.getRows({
         offset: 1,
+        limit: 3,
         orderby: 'debt-credit'
       }, function( err, rows ){
         //console.log(rows); 
+
         callback(null, rows); 
       });
     } 
@@ -205,7 +209,7 @@ app.get('/leaderDebt', function (req, res) {
     } 
     else { 
       debtMessage = '<ol class="leaderBoard">'; 
-      for(var i = 0; i < 3; i++){
+      for(var i = 0; i < results.length; i++){
         if( parseFloat(results[i]['debt-credit']) < 0 ){ 
           debtMessage += "<li>"+results[i].username+" $"+results[i]['debt-credit']+"</li>"; 
         } 
@@ -228,6 +232,7 @@ app.get('/leaderCredit', function (req, res) {
     function checkUser(callback) { 
       sheet.getRows({
         offset: 1,
+	limit: 3,
         orderby: 'debt-credit', 
         reverse: true
       }, function( err, rows ){
@@ -243,7 +248,7 @@ app.get('/leaderCredit', function (req, res) {
     } 
     else { 
       creditMessage = '<ol class="leaderBoard">'; 
-      for(var i = 0; i < 3; i++){
+      for(var i = 0; i < results.length; i++){
         if (parseFloat(results[i]['debt-credit']) >= 0 ) {
           creditMessage += "<li>"+results[i].username+" $"+results[i]['debt-credit']+"</li>"; 
         } 
@@ -276,6 +281,7 @@ async.series([
   function getInfoAndWorksheets(step) {
     doc.getInfo(function(err, info) {
       console.log('Loaded doc: '+info.title+' by '+info.author.email);
+      console.log("found "+info.worksheets.length+" worksheets")
       sheet = info.worksheets[0];
       console.log('sheet 1: '+sheet.title+' '+sheet.rowCount+'x'+sheet.colCount);
       itemSheet = info.worksheets[1]; 
@@ -380,6 +386,8 @@ app.post('/process_registration', urlencodedParser, function (req, res) {
   response = {
     userid:req.body.inputId, 
     username:req.body.inputName, 
+    email:req.body.email,
+    venmoName:req.body.venmoName,
     balance:req.body.inputBalance
   };
 
@@ -415,6 +423,8 @@ app.post('/process_registration', urlencodedParser, function (req, res) {
       sheet.addRow({
           'userid': response.userid.toString().trim(), 
           'username': response.username.toString().trim(),  
+          'email': response.email.toString().trim(), 
+          'venmoname': response.venmoName.toString().trim(),
           'debt-credit': response.balance.toString().trim()
       }, function(err){
 
