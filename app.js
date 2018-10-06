@@ -284,8 +284,19 @@ async.series([
       console.log("found "+info.worksheets.length+" worksheets")
       sheet = info.worksheets[0];
       console.log('sheet 1: '+sheet.title+' '+sheet.rowCount+'x'+sheet.colCount);
-      itemSheet = info.worksheets[1]; 
-      logSheet = info.worksheets[2]; 
+
+      itemSheetIdx = 0; 
+      logSheetIdx = 0; 
+      for (var i=0; i < info.worksheets.length; i++){
+        if(info.worksheets[i]['title'] == 'Food'){ 
+          itemSheetIdx = i; 
+        } 
+        if(info.worksheets[i]['title'] == 'Log'){ 
+          logSheetIdx = i; 
+        } 
+      }
+      itemSheet = info.worksheets[itemSheetIdx]; 
+      logSheet = info.worksheets[logSheetIdx]; 
       step();
     });
   }, 
@@ -293,6 +304,7 @@ async.series([
     itemSheet.getRows({
       offset: 1,
     }, function( err, rows ){
+      
       itemRows = rows; 
       step()
     }); 
