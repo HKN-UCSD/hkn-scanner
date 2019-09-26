@@ -9,7 +9,9 @@ Download repo
 
 cd to repo
 
-`npm init`
+`npm install`
+
+Make sure to npm install -g forever
 
 `node_modules/forever/bin/forever start app.js` (This will start the site and restart the service if it ever crashes.)
 
